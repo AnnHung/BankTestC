@@ -32,6 +32,7 @@ struct CONFIGURATION{
 struct BANK{
     long bankId;
     char bankName[50];
+    int isDeleted;
 };
 /*************/
 
@@ -41,7 +42,7 @@ struct CONFIGURATION* getConfiguration();
 void addNewBank();
 void saveNewBank(struct BANK *newBank);
 void listAllBanks();
-void updateBank();
+void updateBank(int isDelete);
 void printBankInfo(struct BANK *bank);
 /****************/
 
@@ -73,7 +74,11 @@ int main(int argc, char** argv) {
                 printDirection();
                 break;
             case '3':
-                updateBank();
+                updateBank(0);
+                printDirection();
+                break;
+            case '4':
+                updateBank(1);
                 printDirection();
                 break;
             case 'q':
@@ -94,6 +99,7 @@ void printDirection(){
     printf("1, Add new Bank.\n");
     printf("2, List all Banks.\n");
     printf("3, Update bank by Id.\n");
+    printf("4, Delete bank by Id.\n");
     printf("Q, Exit.\n");
 }
 
@@ -128,7 +134,8 @@ void addNewBank(){
     printf("Please insert bank name: \n");   
     char *newBankName = malloc(sizeof(char[BANK_NAME_LENGTH]));
     fgets(newBankName,BANK_NAME_LENGTH,stdin);
-    strcpy(newBank->bankName,newBankName);    
+    strcpy(newBank->bankName,newBankName);  
+    newBank->isDeleted = 0;
     fflush(stdin);
     saveNewBank(newBank);
 }
@@ -154,17 +161,20 @@ void listAllBanks(){
     int fileSize = ftell(bankDatFile);
     fseek(bankDatFile, 0L, SEEK_SET);
     int size = fileSize/sizeof(struct BANK);
-    printf("Number of elements: %d\n", size);
     for(int count = 0;count < size;count++){
-        if(0 != sizeof(allBanks[count])){
+        if((0 != sizeof(allBanks[count])) && (0 == allBanks[count].isDeleted)){
             printBankInfo(&allBanks[count]);
         }
     }
     fclose(bankDatFile);
 }
 
-void updateBank(){
-    printf("Enter bank id to process: \n");
+void updateBank(int isDeleted){
+    if(0 == isDeleted){
+        printf("Enter bank id to update: \n");
+    }else if(1 == isDeleted){
+        printf("Enter bank id to delete: \n");
+    }
     long bankId;
     char *strBankId = malloc(sizeof(char[8]));
     while(1==1){
@@ -204,18 +214,26 @@ void updateBank(){
         printf("No result found;");
         return;
     }
-    
-    printf("UPDATE Bank Name: \n");
-    char *updateBankName = malloc(sizeof(char[BANK_NAME_LENGTH]));
-    fgets(updateBankName, BANK_NAME_LENGTH, stdin);
-    
-    if(NULL != updateBankName && updateBankName[0] != '\0'){
-        strcpy(ptrBank->bankName, updateBankName);
+    if(0 == isDeleted){
+        printf("UPDATE Bank Name: \n");
+        char *updateBankName = malloc(sizeof(char[BANK_NAME_LENGTH]));
+        fgets(updateBankName, BANK_NAME_LENGTH, stdin);
+
+        if(NULL != updateBankName && updateBankName[0] != '\0'){
+            strcpy(ptrBank->bankName, updateBankName);
+        }
+    }else if(1 == isDeleted){
+        ptrBank->isDeleted = 1;
     }
     fseek(datFile, foundLoc, SEEK_SET);
     fwrite(ptrBank, sizeof(struct BANK),1,datFile);
     fclose(datFile);
-    printf("BANK UPDATE SUCCESSFULLY.\n");
+    free(ptrBank);
+    if(0 == isDeleted){
+        printf("BANK UPDATE SUCCESSFULLY.\n");
+    }else if(1 == isDeleted){
+        printf("BANK DELETE SUCCESSFULLY.\n");
+    }
 }
 
 void printBankInfo(struct BANK *bank){
