@@ -16,6 +16,11 @@
 #include <string.h>
 #include <wchar.h>
 #include <ctype.h>
+#include <conio.h>
+
+#define ESC_KEY 27
+#define SPACE_KEY 32
+#define ERROR_KEY 77
 
 /***CONTANT****/
 const char CONFIGURATION_FILE_PATH[] = "G:\\Dev\\Development\\Source\\C\\BankTest\\config.dat";
@@ -41,6 +46,13 @@ const char BANK_STATUS_TYPE_DEACTIVE = 'N';
 struct CONFIGURATION{
     int currentSequence;
 };
+
+struct BANK_DATE{
+    int day;
+    int month;
+    int year;
+};
+
 struct BANK{
     long bankId;
     char bankName[50];    
@@ -50,13 +62,9 @@ struct BANK{
     char memberType[3];
     char status[2];
     int isDeleted;
-    struct BANK_DATE *foundDate;
+    struct BANK_DATE foundDate;
 };
-struct BANK_DATE{
-    int day;
-    int month;
-    int year;
-};
+
 /*************/
 
 /****FUNCTION****/
@@ -119,8 +127,7 @@ int main(int argc, char** argv) {
 }
 
 void printDirection(){
-    printf("**********************************************************************\n");
-    printf("BANK MANAGEMENT\n");
+    printf("BANK MANAGEMENT MENU:\n");
     printf("Please choose menu option by input the suggested key below:\n");
     printf("1, Add new Bank.\n");
     printf("2, List all Banks.\n");
@@ -153,12 +160,12 @@ void saveConfiguration(struct CONFIGURATION *newConfig){
     printf("NEW CONFIGURATION SAVED.\n");
 }
 
-void addNewBank(){
+ void addNewBank(){
     fflush(stdin);
     /*char *tmpStr;*/
     struct BANK *newBank = malloc(sizeof(struct BANK));
     printf("ADD NEW BANK.\n");
-    /*Bank name*/
+   /*Bank name*/
     printf("Please insert bank name: \n"); 
     char *newBankName = malloc(sizeof(char[BANK_NAME_LENGTH]));
     fgets(newBankName,BANK_NAME_LENGTH,stdin);
@@ -199,7 +206,6 @@ void addNewBank(){
         }else{ 
             printf("Value must be 'CN' or 'HS'; Please re-insert: \n"); 
         }
-        
     }
     strcpy(newBank->bankType,newBankType);
     /*Member type*/
@@ -246,15 +252,12 @@ void addNewBank(){
     /*Bank found date*/
     printf("Please enter bank found date: dd/mm/yyyy:\n");
     int day, month, year;
-    scanf("%d/%d/%/d",&day, &month, &year);
-    struct BANK_DATE foundDate;
-    foundDate.day = day;
-    foundDate.month = month;
-    foundDate.year = year;
-    newBank->foundDate = malloc(sizeof(struct BANK_DATE));
-    newBank->foundDate->day = day;
-    newBank->foundDate->month = month;
-    newBank->foundDate->year = year;
+    scanf("%d/%d/%d",&day, &month, &year);
+    struct BANK_DATE *newFoundDate = malloc(sizeof(struct BANK_DATE));
+    newFoundDate->day = day;
+    newFoundDate->month = month;
+    newFoundDate->year = year;
+    memcpy(&(newBank->foundDate), newFoundDate, sizeof(struct BANK_DATE));
         
     newBank->isDeleted = 0;
     fflush(stdin);
@@ -338,12 +341,155 @@ void updateBank(int isDeleted){
         return;
     }
     if(0 == isDeleted){
-        printf("UPDATE Bank Name: \n");
-        char *updateBankName = malloc(sizeof(char[BANK_NAME_LENGTH]));
-        fgets(updateBankName, BANK_NAME_LENGTH, stdin);
-
-        if(NULL != updateBankName && updateBankName[0] != '\0'){
-            strcpy(ptrBank->bankName, updateBankName);
+        int choice = 0;
+        /*Bank Name*/
+        while(1==1){
+            printf("Do you want to change bank name? ESC for cancel, [SPACE] for skip, Enter to proceed: \n");
+            choice = getch();
+            if(ESC_KEY == choice){return;}
+            if(SPACE_KEY == choice){break;}
+            fflush(stdin);
+            printf("Enter new bank name: \n");
+            char *updateBankName = malloc(sizeof(char[BANK_NAME_LENGTH]));
+            fgets(updateBankName, BANK_NAME_LENGTH, stdin);        
+            if(NULL != updateBankName && updateBankName[0] != '\0'){
+                processInput(updateBankName, BANK_NAME_LENGTH);
+                strcpy(ptrBank->bankName, updateBankName);
+                break;
+            }
+        }
+        choice = 0;
+        while(1==1){
+            fflush(stdin);
+            printf("Do you want to change bank address, press -> key, ESC to cancel to skip: \n");
+            choice = getch();
+            if(ESC_KEY == choice){return;}
+            if(SPACE_KEY == choice){break;}
+            fflush(stdin);
+            printf("Enter new bank address: \n");
+            char *updateBankAddrss = malloc(sizeof(char[BANK_ADDRESS_LENGTH]));
+            fgets(updateBankAddrss, BANK_ADDRESS_LENGTH, stdin);        
+            if(NULL != updateBankAddrss && updateBankAddrss[0] != '\0'){
+                processInput(updateBankAddrss, BANK_ADDRESS_LENGTH);
+                strcpy(ptrBank->bankAddress, updateBankAddrss);
+                break;
+            }
+        }
+        choice = 0;
+        while(1==1){
+            fflush(stdin);
+            printf("Do you want to change bank phone, press [SPACE] key, ESC to cancel to skip: \n");
+            choice = getch();
+            if(ESC_KEY == choice){return;}
+            if(SPACE_KEY == choice){break;}
+            fflush(stdin);
+            printf("Enter new bank phone: \n");
+            char *updateBankPhone = malloc(sizeof(char[BANK_PHONE_LENGTH]));
+            fgets(updateBankPhone, BANK_ADDRESS_LENGTH, stdin);        
+            if(NULL != updateBankPhone && updateBankPhone[0] != '\0'){
+                processInput(updateBankPhone, BANK_ADDRESS_LENGTH);
+                strcpy(ptrBank->phoneNo, updateBankPhone);
+                break;
+            }
+        }
+        choice = 0;
+         while(1==1){
+            fflush(stdin);
+            printf("Do you want to change bank type, press [SPACE] key, ESC to cancel to skip: \n");
+            choice = getch();
+            if(ESC_KEY == choice){return;}
+            if(SPACE_KEY == choice){break;}
+            fflush(stdin);
+            printf("Enter new bank type: \n");
+            char *updateBankType = malloc(sizeof(char[BANK_TYPE_LENGTH]));
+            while(1==1){
+                fgets(updateBankType,BANK_TYPE_LENGTH,stdin);
+                /*tmpStr = strtok(newBankType,"\n");*/
+                processInput(updateBankType, BANK_TYPE_LENGTH);
+                fflush(stdin);
+                if('\0' != updateBankType[0] && 
+                        (0 == strcmp(BANK_TYPE_CN,updateBankType) || 
+                        0 == strcmp(BANK_TYPE_HS,updateBankType))){
+                    break;
+                }else{ 
+                    printf("Value must be 'CN' or 'HS'; Please re-insert: \n"); 
+                }
+                
+            }     
+            strcpy(ptrBank->bankType, updateBankType);
+            break;
+        }
+        choice = 0;
+        while(1==1){
+            fflush(stdin);
+            printf("Do you want to change bank member type, press [SPACE] key, ESC to cancel to skip: \n");
+            choice = getch();
+            if(ESC_KEY == choice){return;}
+            if(SPACE_KEY == choice){break;}
+            fflush(stdin);
+            printf("Enter new bank member type: \n");
+            char *updateBankMemberType = malloc(sizeof(char[BANK_MEMBER_TYPE_LENGTH]));
+            while(1==1){
+                fgets(updateBankMemberType,BANK_MEMBER_TYPE_LENGTH,stdin);
+                /*tmpStr = strtok(newBankType,"\n");*/
+                processInput(updateBankMemberType, BANK_MEMBER_TYPE_LENGTH);
+                fflush(stdin);
+                if ('\0' != updateBankMemberType[0] 
+                        && (0 == strcmp(BANK_MEMBER_TYPE_NN, updateBankMemberType) 
+                        || 0 == strcmp(BANK_MEMBER_TYPE_CP, updateBankMemberType) 
+                        || 0 == strcmp(BANK_MEMBER_TYPE_KB, updateBankMemberType))) {
+                    break;
+                }else{
+                    printf("Value must be 'NN' or 'CP' or 'KB'; Please re-insert: \n"); 
+                }
+            }     
+            strcpy(ptrBank->memberType, updateBankMemberType);
+            break;
+        }
+        choice = 0;
+        while(1==1){
+            fflush(stdin);
+            printf("Do you want to change bank status, press [SPACE] key, ESC to cancel to skip: \n");
+            choice = getch();
+            if(ESC_KEY == choice){return;}
+            if(SPACE_KEY == choice){break;}
+            fflush(stdin);
+            printf("Enter new bank status: \n");
+            char *updateBankStatus = malloc(sizeof(char[BANK_STATUS_LENGTH]));
+            while(1==1){
+                fgets(updateBankStatus,BANK_STATUS_LENGTH,stdin);
+                /*tmpStr = strtok(newBankType,"\n");*/
+                processInput(updateBankStatus, BANK_STATUS_LENGTH);
+                fflush(stdin);
+                if('\0' != updateBankStatus[0] && 
+                    (BANK_STATUS_TYPE_ACTIVE == (char)updateBankStatus[0] || 
+                     BANK_STATUS_TYPE_DEACTIVE == (char)updateBankStatus[0])){
+                    break;
+                }else{
+                    printf("Value must be 'Y' or 'N'; Please re-insert: \n"); 
+                }
+            }     
+            strcpy(ptrBank->status, updateBankStatus);
+            break;
+        }
+        choice = 0;
+        while(1==1){
+            fflush(stdin);
+            printf("Do you want to change bank found date, press [SPACE] key, ESC to cancel to skip: \n");
+            choice = getch();
+            if(ESC_KEY == choice){return;}
+            if(SPACE_KEY == choice){break;}
+            fflush(stdin);
+            printf("Enter new bank found date: \n");
+            struct BANK_DATE *updateBankFoundDate = malloc(sizeof(struct BANK_DATE));
+            printf("Please enter new bank found date: dd/mm/yyyy:\n");
+            int day, month, year;
+            scanf("%d/%d/%d",&day, &month, &year);
+            updateBankFoundDate->day = day;
+            updateBankFoundDate->month = month;
+            updateBankFoundDate->year = year;
+            memcpy(&(ptrBank->foundDate), updateBankFoundDate, sizeof(struct BANK_DATE));
+            break;
         }
     }else if(1 == isDeleted){
         ptrBank->isDeleted = 1;
@@ -360,12 +506,11 @@ void updateBank(int isDeleted){
 }
 
 void printBankInfo(struct BANK *bank){
-    printf("%-8.8ld|%-30.50s|%-40.100s|%-15.20s|%-7.4s|%-9.8s|%-9.6s|%-2.2d/%-2.2d/%-4.4d\n",bank->bankId,bank->bankName, bank->bankAddress, bank->phoneNo, bank->bankType, bank->memberType, bank->status, bank->foundDate->day,bank->foundDate->month, bank->foundDate->year);
+    printf("%-8.8ld|%-30.50s|%-40.100s|%-15.20s|%-7.4s|%-9.8s|%-9.6s|%-2.2d/%-2.2d/%-4.4d\n",bank->bankId,bank->bankName, bank->bankAddress, bank->phoneNo, bank->bankType, bank->memberType, bank->status, bank->foundDate.day,bank->foundDate.month, bank->foundDate.year);
     printf("--------------------------------------------------------------------------------------------------------------------------------------\n");
 }
 
 void printTableHeaded(){
-    printf("*****************BANK INFO*****************\n");
     printf("---------------------------------------------------------------------------------------------------------------------------------------\n");      
     printf("Id      |Name                          |Address                                 |Phone          |Type   |Member   |Status   |Found Date\n");
     printf("---------------------------------------------------------------------------------------------------------------------------------------\n");
