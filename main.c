@@ -18,16 +18,16 @@
 #include <ctype.h>
 
 /***CONTANT****/
-const char CONFIGURATION_FILE_PATH[] = ".\\config.dat";
-const char DATA_FILE_PATH[] = ".\\data.dat";
+const char CONFIGURATION_FILE_PATH[] = "G:\\Dev\\Development\\Source\\C\\BankTest\\config.dat";
+const char DATA_FILE_PATH[] = "G:\\Dev\\Development\\Source\\C\\BankTest\\data.dat";
 const long MAX_BANK_QUANTITY = 99999999;
 const int PAGINATION_NUMBER = 1000;
 const int BANK_NAME_LENGTH = 50;
 const int BANK_ADDRESS_LENGTH = 50;
 const int BANK_PHONE_LENGTH = 30;
-const int BANK_TYPE_LENGTH = 2;
-const int BANK_MEMBER_TYPE_LENGTH = 2;
-const int BANK_STATUS_LENGTH = 1;
+const int BANK_TYPE_LENGTH = 2+1;
+const int BANK_MEMBER_TYPE_LENGTH = 2+1;
+const int BANK_STATUS_LENGTH = 1+1;
 const char BANK_TYPE_HS[] = "HS";
 const char BANK_TYPE_CN[] = "CN";
 const char BANK_MEMBER_TYPE_NN[] = "NN";
@@ -46,9 +46,9 @@ struct BANK{
     char bankName[50];    
     char bankAddress[100];
     char phoneNo[30];
-    char bankType[2];
-    char memberType[2];
-    char status;
+    char bankType[3];
+    char memberType[3];
+    char status[2];
     int isDeleted;
     struct BANK_DATE *foundDate;
 };
@@ -67,6 +67,8 @@ void saveNewBank(struct BANK *newBank);
 void listAllBanks();
 void updateBank(int isDelete);
 void printBankInfo(struct BANK *bank);
+void printTableHeaded();
+void processInput(char *input, int size);
 /****************/
 
 struct CONFIGURATION *appConfig;
@@ -117,6 +119,7 @@ int main(int argc, char** argv) {
 }
 
 void printDirection(){
+    printf("**********************************************************************\n");
     printf("BANK MANAGEMENT\n");
     printf("Please choose menu option by input the suggested key below:\n");
     printf("1, Add new Bank.\n");
@@ -152,40 +155,51 @@ void saveConfiguration(struct CONFIGURATION *newConfig){
 
 void addNewBank(){
     fflush(stdin);
+    /*char *tmpStr;*/
     struct BANK *newBank = malloc(sizeof(struct BANK));
     printf("ADD NEW BANK.\n");
     /*Bank name*/
     printf("Please insert bank name: \n"); 
     char *newBankName = malloc(sizeof(char[BANK_NAME_LENGTH]));
     fgets(newBankName,BANK_NAME_LENGTH,stdin);
-    strcpy(newBank->bankName,newBankName);
+    processInput(newBankName, BANK_NAME_LENGTH);
+    /*tmpStr = strtok(newBankName,"\n");*/
+    strcpy(newBank->bankName, newBankName);
     fflush(stdin);
     /*Bank address*/
-    printf("Please insert bank address: \n"); 
+    printf("Please insert bank address: \n");
     char *newBankAddress = malloc(sizeof(char[BANK_ADDRESS_LENGTH]));
-    fgets(newBankName,BANK_ADDRESS_LENGTH,stdin);
-    strcpy(newBank->bankAddress,newBankAddress);
+    fgets(newBankAddress,BANK_ADDRESS_LENGTH,stdin);    
     fflush(stdin);
+    processInput(newBankAddress, BANK_ADDRESS_LENGTH);
+    /*tmpStr = strtok(newBankAddress,"\n");*/
+    strcpy(newBank->bankAddress, newBankAddress);
     /*Bank phone*/
     printf("Please insert bank phone: \n"); 
-    char *newBankPhone = malloc(sizeof(char[BANK_ADDRESS_LENGTH]));
-    fgets(newBankName,BANK_ADDRESS_LENGTH,stdin);
-    strcpy(newBank->bankAddress,newBankAddress);
+    char *newBankPhone = malloc(sizeof(char[BANK_PHONE_LENGTH]));
+    fgets(newBankPhone,BANK_PHONE_LENGTH,stdin);
+    processInput(newBankPhone, BANK_PHONE_LENGTH);
+    /*tmpStr = strtok(newBankPhone,"\n");*/
+    strcpy(newBank->phoneNo,newBankPhone);
     fflush(stdin);
     /*Bank type*/
     printf("Please insert bank type(CN/HS): \n"); 
     printf("CN(Chi Nhanh) \n"); 
     printf("HS(Hoi So) \n");
     char *newBankType = malloc(sizeof(char[BANK_TYPE_LENGTH]));
-    fgets(newBankType,BANK_TYPE_LENGTH,stdin);
     while(1==1){
         fgets(newBankType,BANK_TYPE_LENGTH,stdin);
+        /*tmpStr = strtok(newBankType,"\n");*/
+        processInput(newBankType, BANK_TYPE_LENGTH);
         fflush(stdin);
-        if('\0' != newBankType[0] || 
-                0 != strcmp(BANK_TYPE_CN,newBankType) || 
-                0 != strcmp(BANK_TYPE_HS,newBankType)){
+        if('\0' != newBankType[0] && 
+                (0 == strcmp(BANK_TYPE_CN,newBankType) || 
+                0 == strcmp(BANK_TYPE_HS,newBankType))){
+            break;
+        }else{ 
             printf("Value must be 'CN' or 'HS'; Please re-insert: \n"); 
         }
+        
     }
     strcpy(newBank->bankType,newBankType);
     /*Member type*/
@@ -193,15 +207,18 @@ void addNewBank(){
     printf("NN(Ngan Hang Nha Nuoc) \n"); 
     printf("CP(Ngan Hang TMCP) \n");
     printf("KV(Kho Bac) \n");
-    char *newBankMemberType = malloc(sizeof(char[BANK_MEMBER_TYPE_LENGTH]));
-    fgets(newBankMemberType,BANK_TYPE_LENGTH,stdin);
+    char newBankMemberType[BANK_MEMBER_TYPE_LENGTH];
     while(1==1){
         fgets(newBankMemberType,BANK_MEMBER_TYPE_LENGTH,stdin);
+        processInput(newBankMemberType, BANK_MEMBER_TYPE_LENGTH);
+        /*tmpStr = strtok(newBankMemberType,"\n");*/
         fflush(stdin);
-        if ('\0' != newBankType[0] 
-                || 0 != strcmp(BANK_MEMBER_TYPE_NN, newBankMemberType) 
-                || 0 != strcmp(BANK_MEMBER_TYPE_CP, newBankMemberType) 
-                || 0 != strcmp(BANK_MEMBER_TYPE_KB, newBankMemberType)) {
+        if ('\0' != newBankMemberType[0] 
+                && (0 == strcmp(BANK_MEMBER_TYPE_NN, newBankMemberType) 
+                || 0 == strcmp(BANK_MEMBER_TYPE_CP, newBankMemberType) 
+                || 0 == strcmp(BANK_MEMBER_TYPE_KB, newBankMemberType))) {
+            break;
+        }else{
             printf("Value must be 'NN' or 'CP' or 'KB'; Please re-insert: \n"); 
         }
     }
@@ -211,27 +228,35 @@ void addNewBank(){
     printf("Please insert bank status(Y/N): \n"); 
     printf("Y(Dang Hoant Dong) \n"); 
     printf("N(Da Dung Hoat Dong) \n");
-    char *newBankStatus = malloc(sizeof(char[BANK_STATUS_LENGTH]));
-    fgets(newBankStatus,BANK_TYPE_LENGTH,stdin);
+    char newBankStatus[BANK_STATUS_LENGTH];
     while(1==1){
-        fgets(newBankStatus,BANK_TYPE_LENGTH,stdin);
+        fgets(newBankStatus,BANK_STATUS_LENGTH,stdin);
+        processInput(newBankStatus, BANK_STATUS_LENGTH);
+        /*tmpStr = strtok(newBankStatus,"\n");*/
         fflush(stdin);
-        if('\0' != newBankStatus[0] || 
-                0 != strcmp(BANK_STATUS_TYPE_ACTIVE,newBankStatus) || 
-                0 != strcmp(BANK_STATUS_TYPE_DEACTIVE,newBankStatus)){
+        if('\0' != newBankStatus[0] && 
+                (BANK_STATUS_TYPE_ACTIVE == (char)newBankStatus[0] || 
+                 BANK_STATUS_TYPE_DEACTIVE == (char)newBankStatus[0])){
+            break;
+        }else{
             printf("Value must be 'Y' or 'N'; Please re-insert: \n"); 
         }
     }
-    strcpy(newBank->status,newBankStatus);
+    strcpy(newBank->status, newBankStatus);
     /*Bank found date*/
     printf("Please enter bank found date: dd/mm/yyyy:\n");
     int day, month, year;
-    scanf("%d/%d/%/d",day, month, year);
-    
-    
+    scanf("%d/%d/%/d",&day, &month, &year);
+    struct BANK_DATE foundDate;
+    foundDate.day = day;
+    foundDate.month = month;
+    foundDate.year = year;
+    newBank->foundDate = malloc(sizeof(struct BANK_DATE));
+    newBank->foundDate->day = day;
+    newBank->foundDate->month = month;
+    newBank->foundDate->year = year;
+        
     newBank->isDeleted = 0;
-    
-    saveConfiguration(appConfig);
     fflush(stdin);
     saveNewBank(newBank);
 }
@@ -258,6 +283,7 @@ void listAllBanks(){
     int fileSize = ftell(bankDatFile);
     fseek(bankDatFile, 0L, SEEK_SET);
     int size = fileSize/sizeof(struct BANK);
+    printTableHeaded();
     for(int count = 0;count < size;count++){
         if((0 != sizeof(allBanks[count])) && (0 == allBanks[count].isDeleted)){
             printBankInfo(&allBanks[count]);
@@ -334,7 +360,40 @@ void updateBank(int isDeleted){
 }
 
 void printBankInfo(struct BANK *bank){
+    printf("%-8.8ld|%-30.50s|%-40.100s|%-15.20s|%-7.4s|%-9.8s|%-9.6s|%-2.2d/%-2.2d/%-4.4d\n",bank->bankId,bank->bankName, bank->bankAddress, bank->phoneNo, bank->bankType, bank->memberType, bank->status, bank->foundDate->day,bank->foundDate->month, bank->foundDate->year);
+    printf("--------------------------------------------------------------------------------------------------------------------------------------\n");
+}
+
+void printTableHeaded(){
     printf("*****************BANK INFO*****************\n");
-    printf("Bank ID: %ld\n",bank->bankId);
-    printf("Bank Name: %s\n",bank->bankName);
+    printf("---------------------------------------------------------------------------------------------------------------------------------------\n");      
+    printf("Id      |Name                          |Address                                 |Phone          |Type   |Member   |Status   |Found Date\n");
+    printf("---------------------------------------------------------------------------------------------------------------------------------------\n");
+    
+}
+
+void processInput(char *input, int size){
+    /*
+    if(NULL != input){
+        char *tmpChar;
+        tmpChar = strtok(input,"\n");
+        if(NULL == tmpChar){
+            tmpChar = strtok(input,"\0");
+        }
+        if(NULL == tmpChar){
+            tmpChar = strtok(input, "\r");
+        }
+        return tmpChar;
+    }else{
+        return NULL;
+    }
+    */
+    if(NULL != input){
+        int count = 0;
+        for(;count < size; count++){
+            if('\n' == *(input + count) || '\r' == *(input + count)){
+                *(input + count) = '\0';
+            }
+        }
+    }
 }
