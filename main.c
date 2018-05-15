@@ -17,6 +17,7 @@
 #include <wchar.h>
 #include <ctype.h>
 #include <conio.h>
+#include <math.h>
 
 #define ESC_KEY 27
 #define SPACE_KEY 32
@@ -82,6 +83,9 @@ void updateBank(int isDelete);
 void printBankInfo(struct BANK *bank);
 void printTableHeaded();
 void processInput(char *input, int size);
+void searchBank();
+int isContainSubString(char *keyword, char *source);
+void sortBanks();
 /****************/
 
 struct CONFIGURATION *appConfig;
@@ -123,6 +127,10 @@ int main(int argc, char** argv) {
                 searchBank();
                 printDirection();
                 break;
+            case '6':
+                sortBanks();
+                printDirection();
+                break;
             case 'q':
                 isRunning = 0;
                 break;
@@ -143,6 +151,7 @@ void printDirection(){
     printf("3, Update bank by Id.\n");
     printf("4, Delete bank by Id.\n");
     printf("5, Search bank in Hanoi by status and bank type.\n");
+    printf("6, Sort banks.\n");
     printf("Q, Exit.\n");
 }
 
@@ -307,7 +316,7 @@ void listAllBanks(int search){
         if((0 != sizeof(allBanks[count])) && (0 == allBanks[count].isDeleted)){
             if(0 == search){
                 printBankInfo(&allBanks[count]);
-            }else if(search == allBanks[count].searchFlag){                
+            }else if(search == allBanks[count].searchFlag && 0 <= isContainSubString("Ha Noi", allBanks[count].bankAddress)){   
                 printBankInfo(&allBanks[count]);
             }
         }
@@ -584,4 +593,65 @@ void searchBank(){
     else if(BANK_STATUS_TYPE_ACTIVE == status[0] && 0 == strcmp(BANK_TYPE_HS, bankType)){listAllBanks(Y_HS);}
     else if(BANK_STATUS_TYPE_DEACTIVE == status[0] && 0 ==  strcmp(BANK_TYPE_CN, bankType)){listAllBanks(N_CN);}
     else if(BANK_STATUS_TYPE_DEACTIVE == status[0] && 0 == strcmp(BANK_TYPE_HS, bankType)){listAllBanks(N_HS);}   
+}
+
+int isContainSubString(char *keyword, char *source){
+    int bingo = 0;
+    int kLen = strlen(keyword);
+    int sLen = strlen(source);
+    if(kLen > sLen){
+        return -1;
+    }else if(kLen == sLen){
+        return strcmp(source, keyword) != 0 ? -1 : 0;
+    }else{
+        int kIndex = 0;
+        for(int sIndex = 0; sIndex < sLen; sIndex++){
+            if(*(keyword) == *(sIndex + source)){
+                bingo = 1;
+                int start = keyword;
+                int result = sIndex;
+                while(1 == bingo && kIndex < kLen){
+                    kIndex+=1;
+                    if(*(kIndex + keyword) != *(sIndex + kIndex + source)){
+                        bingo = 0;
+                        kIndex = 0;
+                        keyword = start;
+                    }
+                }
+                if(kIndex >= kLen && bingo == 1){
+                    return result;
+                }
+            }
+        }
+    }
+    return -1;
+}
+
+void sortBanks(){
+    printf("Enter 'asc' or 'dsc' to sort banks: \n");
+    char *choice = malloc(sizeof(char[4]));
+    fflush(stdin);
+    fgets(choice, 4, stdin);
+    if(0 == strcmp(choice, "asc")){
+        listAllBanks(0);
+    }else if(0 == strcmp(choice, "dsc")){
+        FILE *bankDatFile = fopen(DATA_FILE_PATH,"rb");
+        if(NULL == bankDatFile){
+            printf("File's not exists.\n");
+            return;
+        }
+        struct BANK allBanks[PAGINATION_NUMBER];
+        fread(allBanks, sizeof(struct BANK), PAGINATION_NUMBER, bankDatFile);
+        fseek(bankDatFile, 0L, SEEK_END);
+        int fileSize = ftell(bankDatFile);
+        fseek(bankDatFile, 0L, SEEK_SET);
+        int size = fileSize/sizeof(struct BANK);
+        int index = size - 1;
+        printTableHeaded();
+        for(; index > 0; index--){
+            printBankInfo(&allBanks[index]);
+        }
+    }else{
+        printf("Sort type not supported.\n");
+    }
 }
