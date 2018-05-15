@@ -21,6 +21,10 @@
 #define ESC_KEY 27
 #define SPACE_KEY 32
 #define ERROR_KEY 77
+#define Y_CN 1
+#define Y_HS 2
+#define N_CN 3
+#define N_HS 4
 
 /***CONTANT****/
 const char CONFIGURATION_FILE_PATH[] = "G:\\Dev\\Development\\Source\\C\\BankTest\\config.dat";
@@ -61,7 +65,8 @@ struct BANK{
     char bankType[3];
     char memberType[3];
     char status[2];
-    int isDeleted;
+    int searchFlag;
+    int isDeleted;    
     struct BANK_DATE foundDate;
 };
 
@@ -72,7 +77,7 @@ void printDirection();
 struct CONFIGURATION* getConfiguration();
 void addNewBank();
 void saveNewBank(struct BANK *newBank);
-void listAllBanks();
+void listAllBanks(int search);
 void updateBank(int isDelete);
 void printBankInfo(struct BANK *bank);
 void printTableHeaded();
@@ -103,7 +108,7 @@ int main(int argc, char** argv) {
                 printDirection();
                 break;
             case '2':
-                listAllBanks();
+                listAllBanks(0);
                 printDirection();
                 break;
             case '3':
@@ -112,6 +117,10 @@ int main(int argc, char** argv) {
                 break;
             case '4':
                 updateBank(1);
+                printDirection();
+                break;
+            case '5':
+                searchBank();
                 printDirection();
                 break;
             case 'q':
@@ -133,6 +142,7 @@ void printDirection(){
     printf("2, List all Banks.\n");
     printf("3, Update bank by Id.\n");
     printf("4, Delete bank by Id.\n");
+    printf("5, Search bank in Hanoi by status and bank type.\n");
     printf("Q, Exit.\n");
 }
 
@@ -260,6 +270,12 @@ void saveConfiguration(struct CONFIGURATION *newConfig){
     memcpy(&(newBank->foundDate), newFoundDate, sizeof(struct BANK_DATE));
         
     newBank->isDeleted = 0;
+    
+    if(BANK_STATUS_TYPE_ACTIVE == newBank->status[0] && 0 == strcmp(BANK_TYPE_CN, newBank->bankType)){newBank->searchFlag = Y_CN;}
+    else if(BANK_STATUS_TYPE_ACTIVE == newBank->status[0] && 0 == strcmp(BANK_TYPE_HS, newBank->bankType)){newBank->searchFlag = Y_HS;}
+    else if(BANK_STATUS_TYPE_DEACTIVE == newBank->status[0] && 0 == strcmp(BANK_TYPE_CN, newBank->bankType)){newBank->searchFlag = N_CN;}
+    else if(BANK_STATUS_TYPE_DEACTIVE == newBank->status[0] && 0 == strcmp(BANK_TYPE_HS, newBank->bankType)){newBank->searchFlag = N_HS;}
+    
     fflush(stdin);
     saveNewBank(newBank);
 }
@@ -274,7 +290,7 @@ void saveNewBank(struct BANK *newBank){
     fclose(bankDataFile);
 }
 
-void listAllBanks(){
+void listAllBanks(int search){
     FILE *bankDatFile = fopen(DATA_FILE_PATH,"rb");
     if(NULL == bankDatFile){
         printf("File's not exists.\n");
@@ -289,7 +305,11 @@ void listAllBanks(){
     printTableHeaded();
     for(int count = 0;count < size;count++){
         if((0 != sizeof(allBanks[count])) && (0 == allBanks[count].isDeleted)){
-            printBankInfo(&allBanks[count]);
+            if(0 == search){
+                printBankInfo(&allBanks[count]);
+            }else if(search == allBanks[count].searchFlag){                
+                printBankInfo(&allBanks[count]);
+            }
         }
     }
     fclose(bankDatFile);
@@ -541,4 +561,27 @@ void processInput(char *input, int size){
             }
         }
     }
+}
+
+void searchBank(){
+    printf("Enter criteria to search bank in Hanoi:([status]<space>[CN|HS])\n");
+    char *status, *bankType;
+    status = malloc(sizeof(char[BANK_STATUS_LENGTH]));
+    bankType = malloc(sizeof(char[BANK_TYPE_LENGTH]));
+    while(1==1){
+        fflush(stdin);
+        scanf("%s %s", status, bankType);
+        if ((status[0] == '\0' && bankType[0] == '\0') 
+                || (BANK_STATUS_TYPE_ACTIVE != status[0] && BANK_STATUS_TYPE_DEACTIVE != status[0]) 
+                || (0 != strcmp(BANK_TYPE_CN, bankType) && 0 != strcmp(BANK_TYPE_HS, bankType))) {
+            printf("Please re-enter criteria...\n");
+            continue;
+        }
+        break;
+    }
+    
+    if(BANK_STATUS_TYPE_ACTIVE == status[0] && 0 == strcmp(BANK_TYPE_CN, bankType)){listAllBanks(Y_CN);}
+    else if(BANK_STATUS_TYPE_ACTIVE == status[0] && 0 == strcmp(BANK_TYPE_HS, bankType)){listAllBanks(Y_HS);}
+    else if(BANK_STATUS_TYPE_DEACTIVE == status[0] && 0 ==  strcmp(BANK_TYPE_CN, bankType)){listAllBanks(N_CN);}
+    else if(BANK_STATUS_TYPE_DEACTIVE == status[0] && 0 == strcmp(BANK_TYPE_HS, bankType)){listAllBanks(N_HS);}   
 }
