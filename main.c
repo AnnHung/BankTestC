@@ -368,7 +368,7 @@ void updateBank(int isDeleted){
             fflush(stdin);
             printf("Enter new bank address: \n");
             char *updateBankAddrss = malloc(sizeof(char[BANK_ADDRESS_LENGTH]));
-            fgets(updateBankAddrss, BANK_ADDRESS_LENGTH, stdin);        
+            fgets(updateBankAddrss, BANK_ADDRESS_LENGTH, stdin); 
             if(NULL != updateBankAddrss && updateBankAddrss[0] != '\0'){
                 processInput(updateBankAddrss, BANK_ADDRESS_LENGTH);
                 strcpy(ptrBank->bankAddress, updateBankAddrss);
