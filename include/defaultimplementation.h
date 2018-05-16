@@ -180,10 +180,10 @@ void saveConfiguration(struct CONFIGURATION *newConfig){
         inputTimeInfor->tm_min = tmNow->tm_min;
         inputTimeInfor->tm_sec = tmNow->tm_sec;  
         time_t futureTime = mktime(inputTimeInfor);
-        printf("future: %d/%d/%d\n", inputTimeInfor->tm_mday, inputTimeInfor->tm_mon, inputTimeInfor->tm_year);
-        printf("now: %d/%d/%d\n", tmNow->tm_mday, tmNow->tm_mon, tmNow->tm_year);
+        /*printf("future: %d/%d/%d\n", inputTimeInfor->tm_mday, inputTimeInfor->tm_mon, inputTimeInfor->tm_year);
+        printf("now: %d/%d/%d\n", tmNow->tm_mday, tmNow->tm_mon, tmNow->tm_year);*/
         double shiftTime = difftime(futureTime,now);
-        printf("shift time: %lf\n", shiftTime);
+        /*printf("shift time: %lf\n", shiftTime);*/
         if((year < 1990) || (60 * 60 *24*30) < shiftTime){
             continue;
         }
@@ -452,7 +452,7 @@ void updateBank(int isDeleted){
                 printf("future: %d/%d/%d\n", inputTimeInfor->tm_mday, inputTimeInfor->tm_mon, inputTimeInfor->tm_year);
                 printf("now: %d/%d/%d\n", tmNow->tm_mday, tmNow->tm_mon, tmNow->tm_year);*/
                 double shiftTime = difftime(futureTime,now);
-                printf("shift time: %lf\n", shiftTime);
+                /*printf("shift time: %lf\n", shiftTime);*/
                 if((year < 1990) || (60 * 60 *24*30) < shiftTime){
                     continue;
                 }
