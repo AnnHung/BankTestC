@@ -34,3 +34,5 @@ extern "C" {
 #include <ctype.h>
 #include <conio.h>
 #include <math.h>
+#include <time.h>
+#include <stdint.h>

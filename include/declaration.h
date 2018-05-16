@@ -34,6 +34,7 @@ extern "C" {
 #define Y_HS 2
 #define N_CN 3
 #define N_HS 4
+#define _USE_32BIT_TIME_T 0
 
 /***CONTANT****/
 const char CONFIGURATION_FILE_PATH[] = ".\\config.dat";

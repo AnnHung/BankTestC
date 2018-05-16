@@ -159,9 +159,36 @@ void saveConfiguration(struct CONFIGURATION *newConfig){
     }
     strcpy(newBank->status, newBankStatus);
     /*Bank found date*/
-    printf("Please enter bank found date: dd/mm/yyyy:\n");
+    
     int day, month, year;
-    scanf("%d/%d/%d",&day, &month, &year);
+    while(1 == 1){
+        fflush(stdin);
+        printf("Please enter bank found date: dd/mm/yyyy, not farther than next 30 days from now and begin from 01/01/1990:\n");
+        scanf("%d/%d/%d",&day, &month, &year);
+        struct tm *inputTimeInfor = malloc(sizeof(struct tm));
+        if(day > 31 || month > 12 || year < 1900){
+            continue;
+        }
+        
+        time_t now;
+        time(&now);
+        struct tm *tmNow = localtime(&now);
+        inputTimeInfor->tm_mday = day;
+        inputTimeInfor->tm_mon = month-1;
+        inputTimeInfor->tm_year = year-1900;
+        inputTimeInfor->tm_hour = tmNow->tm_hour;
+        inputTimeInfor->tm_min = tmNow->tm_min;
+        inputTimeInfor->tm_sec = tmNow->tm_sec;  
+        time_t futureTime = mktime(inputTimeInfor);
+        printf("future: %d/%d/%d\n", inputTimeInfor->tm_mday, inputTimeInfor->tm_mon, inputTimeInfor->tm_year);
+        printf("now: %d/%d/%d\n", tmNow->tm_mday, tmNow->tm_mon, tmNow->tm_year);
+        double shiftTime = difftime(futureTime,now);
+        printf("shift time: %lf\n", shiftTime);
+        if((year < 1990) || (60 * 60 *24*30) < shiftTime){
+            continue;
+        }
+        break;
+    }
     struct BANK_DATE *newFoundDate = malloc(sizeof(struct BANK_DATE));
     newFoundDate->day = day;
     newFoundDate->month = month;
@@ -254,6 +281,7 @@ void updateBank(int isDeleted){
     }
     if(NULL != ptrBank){
         printf("Found one result: \n");
+        printTableHeaded();
         printBankInfo(ptrBank);
     }else{
         printf("No result found;");
@@ -280,7 +308,7 @@ void updateBank(int isDeleted){
         choice = 0;
         while(1==1){
             fflush(stdin);
-            printf("Do you want to change bank address, press -> key, ESC to cancel to skip: \n");
+            printf("Do you want to change bank address, press [SPACE] key, ESC to cancel to skip: \n");
             choice = getch();
             if(ESC_KEY == choice){return;}
             if(SPACE_KEY == choice){break;}
@@ -399,11 +427,38 @@ void updateBank(int isDeleted){
             if(ESC_KEY == choice){return;}
             if(SPACE_KEY == choice){break;}
             fflush(stdin);
-            printf("Enter new bank found date: \n");
-            struct BANK_DATE *updateBankFoundDate = malloc(sizeof(struct BANK_DATE));
-            printf("Please enter new bank found date: dd/mm/yyyy:\n");
+            
+            fflush(stdin);
             int day, month, year;
-            scanf("%d/%d/%d",&day, &month, &year);
+            while( 1==1){
+                printf("Please enter bank found date: dd/mm/yyyy, not farther than next 30 days from now and begin from 01/01/1990:\n");
+                scanf("%d/%d/%d",&day, &month, &year);
+                struct tm *inputTimeInfor = malloc(sizeof(struct tm));
+                if(day > 31 || month > 12 || year < 1900){
+                    continue;
+                }
+
+                time_t now;
+                time(&now);
+                struct tm *tmNow = localtime(&now);
+                inputTimeInfor->tm_mday = day;
+                inputTimeInfor->tm_mon = month-1;
+                inputTimeInfor->tm_year = year-1900;
+                inputTimeInfor->tm_hour = tmNow->tm_hour;
+                inputTimeInfor->tm_min = tmNow->tm_min;
+                inputTimeInfor->tm_sec = tmNow->tm_sec;  
+                time_t futureTime = mktime(inputTimeInfor);
+                /*
+                printf("future: %d/%d/%d\n", inputTimeInfor->tm_mday, inputTimeInfor->tm_mon, inputTimeInfor->tm_year);
+                printf("now: %d/%d/%d\n", tmNow->tm_mday, tmNow->tm_mon, tmNow->tm_year);*/
+                double shiftTime = difftime(futureTime,now);
+                printf("shift time: %lf\n", shiftTime);
+                if((year < 1990) || (60 * 60 *24*30) < shiftTime){
+                    continue;
+                }
+                break;
+            }
+            struct BANK_DATE *updateBankFoundDate = malloc(sizeof(struct BANK_DATE));
             updateBankFoundDate->day = day;
             updateBankFoundDate->month = month;
             updateBankFoundDate->year = year;
@@ -425,7 +480,7 @@ void updateBank(int isDeleted){
 }
 
 void printBankInfo(struct BANK *bank){
-    printf("%-8.8ld|%-30.50s|%-40.100s|%-15.20s|%-7.4s|%-9.8s|%-9.6s|%-2.2d/%-2.2d/%-4.4d\n",
+    printf("%-8.8ld|%-30.50s|%-40.100s|%-15.20s|%-7.4s|%-9.8s|%-9.6s|%-2.2d/%-2.2d/%-4.4d|\n",
             bank->bankId,
             bank->bankName, 
             bank->bankAddress, 
@@ -441,7 +496,7 @@ void printBankInfo(struct BANK *bank){
 
 void printTableHeaded(){
     printf("---------------------------------------------------------------------------------------------------------------------------------------\n");      
-    printf("Id      |Name                          |Address                                 |Phone          |Type   |Member   |Status   |Found Date\n");
+    printf("Id      |Name                          |Address                                 |Phone          |Type   |Member   |Status   |Found Date|\n");
     printf("---------------------------------------------------------------------------------------------------------------------------------------\n");
     
 }
