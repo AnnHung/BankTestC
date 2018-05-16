@@ -28,8 +28,8 @@
 #define N_HS 4
 
 /***CONTANT****/
-const char CONFIGURATION_FILE_PATH[] = "G:\\Dev\\Development\\Source\\C\\BankTest\\config.dat";
-const char DATA_FILE_PATH[] = "G:\\Dev\\Development\\Source\\C\\BankTest\\data.dat";
+const char CONFIGURATION_FILE_PATH[] = ".\\config.dat";
+const char DATA_FILE_PATH[] = ".\\data.dat";
 const long MAX_BANK_QUANTITY = 99999999;
 const int PAGINATION_NUMBER = 1000;
 const int BANK_NAME_LENGTH = 50;
@@ -535,8 +535,18 @@ void updateBank(int isDeleted){
 }
 
 void printBankInfo(struct BANK *bank){
-    printf("%-8.8ld|%-30.50s|%-40.100s|%-15.20s|%-7.4s|%-9.8s|%-9.6s|%-2.2d/%-2.2d/%-4.4d\n",bank->bankId,bank->bankName, bank->bankAddress, bank->phoneNo, bank->bankType, bank->memberType, bank->status, bank->foundDate.day,bank->foundDate.month, bank->foundDate.year);
-    printf("--------------------------------------------------------------------------------------------------------------------------------------\n");
+    printf("%-8.8ld|%-30.50s|%-40.100s|%-15.20s|%-7.4s|%-9.8s|%-9.6s|%-2.2d/%-2.2d/%-4.4d\n",
+            bank->bankId,
+            bank->bankName, 
+            bank->bankAddress, 
+            bank->phoneNo, 
+            bank->bankType, 
+            bank->memberType, 
+            bank->status, 
+            bank->foundDate.day,
+            bank->foundDate.month, 
+            bank->foundDate.year);
+    printf("---------------------------------------------------------------------------------------------------------------------------------------\n");
 }
 
 void printTableHeaded(){
@@ -648,7 +658,7 @@ void sortBanks(){
         int size = fileSize/sizeof(struct BANK);
         int index = size - 1;
         printTableHeaded();
-        for(; index > 0; index--){
+        for(; index >= 0; index--){
             printBankInfo(&allBanks[index]);
         }
     }else{
