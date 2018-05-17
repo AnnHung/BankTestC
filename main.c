@@ -18,7 +18,6 @@
 
 int main(int argc, char** argv) {
     int isRunning = 1;
-    printf("start");
     appConfig = getConfiguration();
     printDirection();
     while(1 == isRunning){        

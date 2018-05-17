@@ -4,6 +4,8 @@
  * and open the template in the editor.
  */
 
+
+
 /* 
  * File:   defaultimplementation.h
  * Author: nguye
@@ -91,13 +93,26 @@ void saveConfiguration(struct CONFIGURATION *newConfig){
     /*tmpStr = strtok(newBankAddress,"\n");*/
     strcpy(newBank->bankAddress, newBankAddress);
     /*Bank phone*/
-    printf("Please insert bank phone: \n"); 
     char *newBankPhone = malloc(sizeof(char[BANK_PHONE_LENGTH]));
-    fgets(newBankPhone,BANK_PHONE_LENGTH,stdin);
-    processInput(newBankPhone, BANK_PHONE_LENGTH);
-    /*tmpStr = strtok(newBankPhone,"\n");*/
-    strcpy(newBank->phoneNo,newBankPhone);
-    fflush(stdin);
+    while(1 == 1){
+        printf("Please insert bank phone, number only: \n");         
+        fgets(newBankPhone,BANK_PHONE_LENGTH,stdin);
+        processInput(newBankPhone, BANK_PHONE_LENGTH);
+        fflush(stdin);
+        /*tmpStr = strtok(newBankPhone,"\n");*/
+        int phoneLen = strlen(newBankPhone);
+        int chrAt = 0;
+        for(; chrAt < phoneLen; chrAt++){
+            if(!isdigit(*(newBankPhone+chrAt))){
+                break;
+            }
+        }
+        if(phoneLen == chrAt){
+            strcpy(newBank->phoneNo,newBankPhone);
+            break;
+        }
+        
+    }
     /*Bank type*/
     printf("Please insert bank type(CN/HS): \n"); 
     printf("CN(Chi Nhanh) \n"); 
@@ -330,14 +345,28 @@ void updateBank(int isDeleted){
             if(ESC_KEY == choice){return;}
             if(SPACE_KEY == choice){break;}
             fflush(stdin);
-            printf("Enter new bank phone: \n");
+            
             char *updateBankPhone = malloc(sizeof(char[BANK_PHONE_LENGTH]));
-            fgets(updateBankPhone, BANK_ADDRESS_LENGTH, stdin);        
-            if(NULL != updateBankPhone && updateBankPhone[0] != '\0'){
-                processInput(updateBankPhone, BANK_ADDRESS_LENGTH);
-                strcpy(ptrBank->phoneNo, updateBankPhone);
-                break;
+            while(1 == 1){
+                printf("Please insert bank phone, number only: \n");         
+                fgets(updateBankPhone,BANK_PHONE_LENGTH,stdin);
+                processInput(updateBankPhone, BANK_PHONE_LENGTH);
+                fflush(stdin);
+                /*tmpStr = strtok(newBankPhone,"\n");*/
+                int phoneLen = strlen(updateBankPhone);
+                int chrAt = 0;
+                for(; chrAt < phoneLen; chrAt++){
+                    if(!isdigit(*(updateBankPhone+chrAt))){
+                        break;
+                    }
+                }
+                if(phoneLen == chrAt){
+                    strcpy(ptrBank->phoneNo,updateBankPhone);
+                    break;
+                }
+
             }
+            break;
         }
         choice = 0;
          while(1==1){
@@ -604,7 +633,9 @@ void sortBanks(){
         int index = size - 1;
         printTableHeaded();
         for(; index >= 0; index--){
-            printBankInfo(&allBanks[index]);
+            if((0 != sizeof(allBanks[index])) && (0 == allBanks[index].isDeleted)){
+                printBankInfo(&allBanks[index]);
+            }
         }
     }else{
         printf("Sort type not supported.\n");
